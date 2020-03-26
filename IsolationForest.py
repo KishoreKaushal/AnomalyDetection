@@ -1,6 +1,8 @@
 from copy import deepcopy
-import IsolationTree
 import pandas as pd
+from random import sample
+import numpy as np
+import IsolationTree
 
 class IsolationForest(object):
     """
@@ -29,6 +31,7 @@ class IsolationForest(object):
         self.subsample_size = subsample_size
         self.copy_x = copy_x
         self.df = None
+        self.isolation_trees = None
 
     def fit(self, df):
         """
@@ -46,3 +49,20 @@ class IsolationForest(object):
         if not isinstance(self.df, pd.DataFrame):
             self.df = pd.DataFrame(data=self.df)
 
+        num_inst, num_attr = self.df.shape
+
+        if self.subsample_size * self.num_trees > num_inst:
+            raise ValueError("subsample_size ({}) * num_trees ({}) is greater than "
+                             "number of instances ({}) in the dataset."
+                             .format(self.subsample_size, self.num_trees, num_inst))
+
+        subsamples = sample(range(num_inst), self.subsample_size * self.num_trees)
+
+        # partitioning into self.num_trees equal chunks of size self.subsample_size
+        subsamples = np.array(subsamples).reshape(shape=(self.num_trees, self.subsample_size))
+
+        # creating isolation trees -- this code can be parallelized
+        self.isolation_trees = [IsolationTree().fit(df.loc[subsample])
+                                for subsample in subsamples]
+
+        return self
