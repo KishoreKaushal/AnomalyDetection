@@ -70,7 +70,7 @@ class IsolationTree(object):
         return self
 
     def init_tree(self, df, depth):
-        num_inst, num_attr = self.df.shape
+        num_inst, num_attr = df.shape
         self.depth = depth
         self.size = num_inst
         self.df = df
