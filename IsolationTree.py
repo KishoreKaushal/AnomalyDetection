@@ -76,7 +76,7 @@ class IsolationTree(object):
         self.df = df
 
         # if df can be splitted
-        if self.size != 1:
+        if self.size > 1:
             self.splitting_attr = random.randint(0, num_attr-1)
             self.splitting_attr_range = [df[self.splitting_attr].min(),
                                          df[self.splitting_attr].max()]
