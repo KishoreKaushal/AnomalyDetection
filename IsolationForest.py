@@ -19,9 +19,14 @@ class IsolationForest(object):
     copy_x : bool, optional, default True
         If True, dataset x will be copied; else, it may be overwritten.
 
-    df : array-like of shape (n_samples, n_features)
-        Training data
+    Attributes
+    ----------
 
+    isolation_trees : list, default None
+        List of IsolationTree
+
+    df : array-like of shape (n_samples, n_features)
+        Training data.
 
     """
 
