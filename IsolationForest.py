@@ -3,6 +3,7 @@ import pandas as pd
 from random import sample
 import numpy as np
 import IsolationTree
+import utils
 
 class IsolationForest(object):
     """
@@ -66,8 +67,28 @@ class IsolationForest(object):
         # partitioning into self.num_trees equal chunks of size self.subsample_size
         subsamples = np.array(subsamples).reshape(shape=(self.num_trees, self.subsample_size))
 
-        # creating isolation trees -- this code can be parallelized
+        # creating isolation trees -- this code can be parallelized -- using map function
         self.isolation_trees = [IsolationTree().fit(df.loc[subsample])
                                 for subsample in subsamples]
 
         return self
+
+    def anomaly_score(self, df_inst):
+        if not isinstance(df_inst, pd.DataFrame):
+            df_inst = pd.DataFrame(data=df_inst)
+
+        # this can be parallelized -- using map function
+        # scores here is a 2D array of shape => (num_trees, num_df_inst)
+        path_lengths = np.array([i_tree.path_length(df_inst) for i_tree in self.isolation_trees])
+
+        # avg_path_lengths store average path length of an instance in df_inst
+        # shape of avg_path_lengths => (num_df_inst,)
+        avg_path_lengths = np.mean(path_lengths, axis=0)
+
+        c = utils.c(self.subsample_size, self.df.shape[0])
+
+        # normalize scores for each instance in df_inst
+        normalized_anomaly_score = np.power(2, -np.divide(avg_path_lengths, c))
+
+        return normalized_anomaly_score
+
