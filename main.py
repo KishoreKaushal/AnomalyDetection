@@ -3,8 +3,8 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(add_help=True, description='testing isolation forest model')
-    parser.add_argument('-n', '--ntrees', type=int, default=100, help='number of trees in the forest')
-    parser.add_argument('-s', '--samplesize', type=int, default=256, help='sampling rate for each tree')
+    parser.add_argument('-n', '--ntrees', type=int, default=100, help='number of trees in the forest, default 100')
+    parser.add_argument('-s', '--samplesize', type=int, default=256, help='sampling rate for each tree, default 256')
 
     required_named = parser.add_argument_group('required named arguments')
 
