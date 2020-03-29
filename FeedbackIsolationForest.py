@@ -1,5 +1,7 @@
 import IsolationForest
 
+REGULARIZER_TYPES = frozenset(['l1', 'l2'])
+LOSS_FN_TYPES = frozenset(['linear', 'log-likelihood'])
 
 class FeedbackIsolationForest(IsolationForest):
     """
@@ -28,8 +30,19 @@ class FeedbackIsolationForest(IsolationForest):
         """
 
     def __init__(self, num_trees: int = 128, subsample_size: int = 256,
-                 copy_x: bool = True):
+                 copy_x: bool = True, reg_type: str = 'l2',
+                 loss_fn : str = 'linear', set_member = (lambda t: True)):
+        if reg_type not in REGULARIZER_TYPES:
+            raise ValueError('{} regularizer not supported'.format(reg_type))
+
+        if loss_fn not in LOSS_FN_TYPES:
+            raise ValueError('{} loss not supported'.format(loss_fn))
+
         super(FeedbackIsolationForest, self).__init__(num_trees, subsample_size, copy_x)
+        self.reg_type = reg_type
+        self.loss_fn = loss_fn
+        self.set_member = set_member
+
 
     def update_weights(self):
         pass
