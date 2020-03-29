@@ -91,4 +91,3 @@ class IsolationForest(object):
         normalized_anomaly_score = np.power(2, -np.divide(avg_path_lengths, c))
 
         return normalized_anomaly_score
-
