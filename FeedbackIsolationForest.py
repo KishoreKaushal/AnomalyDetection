@@ -24,6 +24,9 @@ class FeedbackIsolationForest(IsolationForest):
             A function which is used to check set membership of the weights in the desired set.
             For a tree, it should be (lambda wt => (wt >= 0)).
 
+        lrate: float, optional, default 1.0
+            Learning rate for mirror descent algorithm.
+
         Attributes
         ----------
 
@@ -36,7 +39,7 @@ class FeedbackIsolationForest(IsolationForest):
         """
 
     def __init__(self, num_trees: int = 128, subsample_size: int = 256, copy_x: bool = True,
-                 loss_fn : str = 'linear', set_member = (lambda wt: (wt >= 0))):
+                 loss_fn : str = 'linear', lrate : float = 1.0, set_member = (lambda wt: (wt >= 0))):
 
         if loss_fn not in LOSS_FN_TYPES:
             raise ValueError('{} loss not supported'.format(loss_fn))
@@ -44,9 +47,11 @@ class FeedbackIsolationForest(IsolationForest):
         super(FeedbackIsolationForest, self).__init__(num_trees, subsample_size, copy_x)
         self.loss_fn = loss_fn
         self.set_member = set_member
+        self.lrate = lrate
 
 
     def update_weights(self):
+
         pass
 
     def score(self):
