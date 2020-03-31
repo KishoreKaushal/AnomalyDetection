@@ -1,4 +1,9 @@
-import FeedbackIsolationTree
+from FeedbackIsolationTree import FeedbackIsolationTree
+import pandas as pd
+from copy import deepcopy
+import random
+import numpy as np
+import utils
 
 LOSS_FN_TYPES = frozenset(['linear', 'log-likelihood'])
 
@@ -9,13 +14,13 @@ class FeedbackIsolationForest(object):
         Parameters
         ----------
         num_trees : int, optional, default 128
-            Number of isolation trees in the forest. Inherited.
+            Number of isolation trees in the forest.
 
         subsample_size : int, optional, default 256
-            Sampling size for the dataset for isolation trees. Inherited.
+            Sampling size for the dataset for isolation trees.
 
         copy_x : bool, optional, default True
-            If True, dataset x will be copied; else, it may be overwritten. Inherited.
+            If True, dataset x will be copied; else, it may be overwritten.
 
         loss_fn: str, optional, default linear
             Loss function to use with mirror descent algorithm.
@@ -27,19 +32,20 @@ class FeedbackIsolationForest(object):
         lrate: float, optional, default 1.0
             Learning rate for mirror descent algorithm.
 
+        df : array-like of shape (n_samples, n_features)
+            Training data.
+
         Attributes
         ----------
 
-        isolation_trees : list, default None
-            List of IsolationTree. Inherited.
-
-        df : array-like of shape (n_samples, n_features)
-            Training data. Inherited.
-
+        feedback_isolation_trees : list, default None
+            List of IsolationTree.
         """
 
-    def __init__(self, num_trees: int = 128, subsample_size: int = 256, copy_x: bool = True,
-                 loss_fn : str = 'linear', lrate : float = 1.0, set_member = (lambda wt: (wt >= 0))):
+    def __init__(self, num_trees: int = 128, subsample_size: int = 256,
+                 copy_x: bool = True, loss_fn : str = 'linear',
+                 lrate : float = 1.0, set_member = (lambda wt: (wt >= 0)),
+                 df = None):
 
         if loss_fn not in LOSS_FN_TYPES:
             raise ValueError('{} loss not supported'.format(loss_fn))
@@ -53,6 +59,45 @@ class FeedbackIsolationForest(object):
         self.loss_fn = loss_fn
         self.set_member = set_member
         self.lrate = lrate
+        
+        if df != None:
+            self.init_base(df)
+
+    def init_base(self, df):
+        """
+        Initializing the base isolation trees.
+
+        Parameters
+        ----------
+        df : pd.Dataframe object
+        """
+
+        if self.copy_x:
+            self.df = deepcopy(df)
+        else:
+            self.df = df
+
+        if not isinstance(self.df, pd.DataFrame):
+            self.df = pd.DataFrame(data=self.df)
+
+        num_inst, num_attr = self.df.shape
+
+        if self.subsample_size * self.num_trees > num_inst:
+            raise ValueError("subsample_size ({}) * num_trees ({}) is greater than "
+                             "number of instances ({}) in the dataset."
+                             .format(self.subsample_size, self.num_trees, num_inst))
+
+        subsamples = random.sample(range(num_inst), self.subsample_size * self.num_trees)
+
+        # partitioning into self.num_trees equal chunks of size self.subsample_size
+        subsamples = np.array(subsamples).reshape(shape=(self.num_trees, self.subsample_size))
+
+        # creating isolation trees -- this code can be parallelized -- using map function
+        self.feedback_isolation_trees = [FeedbackIsolationTree().fit(df.loc[subsample])
+                                for subsample in subsamples]
+
+        return self
+
 
     def update_weights(self, hlim, feedback, lrate, inst):
         """
