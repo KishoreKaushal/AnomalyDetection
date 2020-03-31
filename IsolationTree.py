@@ -65,6 +65,7 @@ class IsolationTree(object):
 
     def fit(self, df):
         # to distinguish root node
+        self.parent = None
         self.root = True
         self.weight = 0
         self.init_tree(df, depth=0)
