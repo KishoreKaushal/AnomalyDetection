@@ -2,7 +2,7 @@ from copy import deepcopy
 import pandas as pd
 from random import sample
 import numpy as np
-import IsolationTree
+from IsolationTree import IsolationTree
 import utils
 
 class IsolationForest(object):
