@@ -2,7 +2,7 @@ import utils
 import random
 
 
-class FeedbackIsolationTree():
+class FeedbackIsolationTree(object):
     """
         Feedback Guided Isolation Tree
 
@@ -104,6 +104,9 @@ class FeedbackIsolationTree():
         """
         Parameters:
         -----------
+        hlim : int
+            Height (or depth) limit of the tree.
+
         inst : pd.DataFrame
             An instance which is used to compute loss.
 
