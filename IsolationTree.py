@@ -112,7 +112,6 @@ class IsolationTree(object):
         """
         path_length_arr = []
 
-
         # this can be parallelized -- using map function
         for _, inst in df_inst.iterrows():
             # this function will only be executed through root node

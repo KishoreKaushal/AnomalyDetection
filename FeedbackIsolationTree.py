@@ -138,6 +138,47 @@ class FeedbackIsolationTree(object):
                 else:
                     curr_node = curr_node.right
 
-    def feedback_score(self):
-        pass
+    def path_length(self, df_inst, hlim, n):
+        """
+        Parameters:
+        -----------
+        df_inst : pd.DataFrame
+            Collection on instances whose path length has to calculated.
+
+        hlim : numeric value
+            Height Limit.
+
+        n : numeric value
+            Dataset size for estimating the size given the sample size.
+
+        Return
+        ------
+        path_length_arr : list
+            A list containing path lengths of each instance in df_inst.
+        """
+        path_length_arr = []
+
+        # this can be parallelized -- using map function or joblib
+        for _, inst in df_inst.iterrows():
+            # this function will only be executed through root node
+            if self.root == False:
+                raise PermissionError("Only root node is permitted to execute this function.")
+
+            curr_node = self
+            plen = 0.0
+            # better not to write this with recursion
+            while (True):
+                if (curr_node.left != None and curr_node.right != None) or curr_node.depth > hlim:
+                    plen += utils.c(curr_node.size, n)
+                    break
+                else:
+                    plen += curr_node.weight
+                    if inst[curr_node.splitting_attr] < curr_node.splitting_val:
+                        curr_node = curr_node.left
+                    else:
+                        curr_node = curr_node.right
+
+            path_length_arr.append(plen)
+
+        return path_length_arr
 
