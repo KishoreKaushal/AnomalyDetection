@@ -123,5 +123,29 @@ class FeedbackIsolationForest(object):
         return self
 
     def score(self, df_inst):
-        
-        pass
+        """
+        Return an array of scores of instances.
+
+        Parameters
+        ----------
+        df_inst : pd.DataFrame object
+            One or more instances.
+
+        Return
+        ------
+        scores : numpy.array
+            An array of anomaly scores for each instance in df_inst.
+        """
+
+        if not isinstance(df_inst, pd.DataFrame):
+            df_inst = pd.DataFrame(data=df_inst)
+
+        # this can be parallelized -- using map function or using joblib
+        # scores here is a 2D array of shape => (num_trees, num_df_inst)
+        path_lengths = np.array([tree.path_length(df_inst) for tree in self.feedback_isolation_trees])
+
+        # scores store sum of path length of an instance across all trees
+        # for each instance in df_inst. Shape of scores => (num_df_inst,)
+        scores = -1 * np.sum(path_lengths, axis=0)
+
+        return scores
