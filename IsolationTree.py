@@ -112,7 +112,7 @@ class IsolationTree(object):
         """
         path_length_arr = []
 
-        # this can be parallelized -- using map function
+        # this can be parallelized -- using map function or using joblib
         for _, inst in df_inst.iterrows():
             # this function will only be executed through root node
             if self.root == False:
@@ -122,11 +122,11 @@ class IsolationTree(object):
             plen = 0.0
             # better not to write this with recursion
             while(True):
-                if (curr_node.left != None and curr_node.right != None) or curr_node.depth > hlim:
-                    plen += utils.c(curr_node.size, n)
+                if (curr_node.left == None and curr_node.right == None) or curr_node.depth >= hlim:
+                    plen += utils.avg_path_len_given_sample_size(curr_node.size, n)
                     break
                 else:
-                    plen += 1
+                    plen += curr_node.weight
                     if inst[curr_node.splitting_attr] < curr_node.splitting_val:
                         curr_node = curr_node.left
                     else:
