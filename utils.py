@@ -2,8 +2,8 @@ from numpy import euler_gamma
 from numpy import log
 
 
-
-def c(sample_size, n) -> float:
+### change the name of the code
+def avg_path_len_given_sample_size(sample_size, n) -> float:
     """"
     Average of path length given subsample size.
 
