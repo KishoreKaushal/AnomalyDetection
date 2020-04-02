@@ -123,7 +123,7 @@ class FeedbackIsolationTree(object):
 
         curr_node = self
         while(True):
-            if (curr_node.left != None and curr_node.right != None) or curr_node.depth > hlim:
+            if (curr_node.left == None and curr_node.right == None) or curr_node.depth >= hlim:
                 break
             else:
                 curr_node.theta -= lrate * feedback
@@ -168,8 +168,9 @@ class FeedbackIsolationTree(object):
             plen = 0.0
             # better not to write this with recursion
             while (True):
-                if (curr_node.left != None and curr_node.right != None) or curr_node.depth > hlim:
-                    plen += utils.c(curr_node.size, n)
+                if (curr_node.left == None and curr_node.right == None) or curr_node.depth >= hlim:
+                    # we don't need this here
+                    # plen += utils.avg_path_len_given_sample_size(curr_node.size, n)
                     break
                 else:
                     plen += curr_node.weight
