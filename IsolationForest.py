@@ -85,7 +85,7 @@ class IsolationForest(object):
         # shape of avg_path_lengths => (num_df_inst,)
         avg_path_lengths = np.mean(path_lengths, axis=0)
 
-        c = utils.c(self.subsample_size, self.df.shape[0])
+        c = utils.avg_path_len_given_sample_size(self.subsample_size, self.df.shape[0])
 
         # normalize scores for each instance in df_inst
         normalized_anomaly_score = np.power(2, -np.divide(avg_path_lengths, c))
