@@ -1,8 +1,14 @@
 import argparse
 
+"""
+Input file must be a pickle file containing dataframe 
+of shape -> (number of instances, number of features + 1)
+The last column must be a boolean data: 1 denotes an anomaly, 0 mean its not.
+
+Output file will contain an array of boolean values, 1 means anomaly, 0 means its not.
+"""
 
 def main():
-
     parser = argparse.ArgumentParser(add_help=True, description='testing feedback guided isolation forest model')
     parser.add_argument('-n', '--ntrees', type=int, default=128, help='number of trees in the forest, default 100')
     parser.add_argument('-s', '--samplesize', type=int, default=256, help='sampling rate for each tree, default 256')
