@@ -77,14 +77,15 @@ class IsolationTree(object):
         self.size = num_inst
         self.df = df
 
-        # if df can be splitted
-        if self.size > 1:
-            self.splitting_attr = random.randint(0, num_attr-1)
-            self.splitting_attr_range = [df[self.splitting_attr].min(),
-                                         df[self.splitting_attr].max()]
+        self.splitting_attr = random.randint(0, num_attr - 1)
+        self.splitting_attr_range = [df[self.splitting_attr].min(),
+                                     df[self.splitting_attr].max()]
 
-            self.splitting_val = random.uniform(self.splitting_attr_range[0],
-                                                self.splitting_attr_range[1])
+        self.splitting_val = random.uniform(self.splitting_attr_range[0],
+                                            self.splitting_attr_range[1])
+
+        # if df can be splitted
+        if self.size > 1 and df[self.splitting_attr].nunique() > 1:
 
             df_left = df[df[self.splitting_attr] < self.splitting_val]
             df_right = df[df[self.splitting_attr] >= self.splitting_val]
