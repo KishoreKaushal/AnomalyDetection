@@ -1,7 +1,7 @@
 from numpy import euler_gamma
 from numpy import log
 
-
+# 105, 453998
 ### change the name of the code
 def avg_path_len_given_sample_size(sample_size, n) -> float:
     """"
@@ -16,7 +16,7 @@ def avg_path_len_given_sample_size(sample_size, n) -> float:
     """
 
     if sample_size > 2:
-        2 * (log(sample_size-1) + euler_gamma) - 2 * (sample_size - 1)/n
+        return 2 * (log(sample_size-1) + euler_gamma) - 2 * (sample_size - 1)/n
     elif sample_size == 2:
         return 1.0
     else:
