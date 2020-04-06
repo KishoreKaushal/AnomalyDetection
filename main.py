@@ -34,9 +34,63 @@ def parse_args():
     return parser.parse_args()
 
 
-def test_feedback_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
-                                   ntrees, samplesize, hlim, lrate):
+def online_update():
     pass
+
+def batch_update():
+    pass
+
+def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
+    """
+    Parameters
+    ----------
+    df : pd.DataFrame object
+        The last column must contain the feedback from the domain experts.
+
+    ntrees : int
+        Number of trees in the forest.
+
+    subsamplesize: int
+        SUbsample size for each tree in isolation forest.
+
+    hlim : int
+        Height limit.
+
+    lrate : float
+        Learning rate of the mirror descent algorithm.
+    """
+    print("--- Feedback Guided Isolation Forest ---")
+    print("Training data shape: ", df.shape)
+    print("ntrees: {}, subsample_size: {}, hlim: {}"
+          .format(ntrees, subsamplesize, hlim))
+
+    t0 = time.time()
+    fif = FeedbackIsolationForest(ntrees, subsamplesize, False, lrate=lrate, df=df)
+    print("Initializing base isolation forests time: {}".format(time.time() - t0))
+
+    df_test = df.copy()
+
+    df_test['score'] = 0.0
+
+    # feedback loop
+    while(df_test.shape[0] > 1):
+        # get score on test dataset
+        df_test['score'] = fif.score(df_test[df_test.columns[:-1]])
+
+        # print top 10 anomalies
+        top_10 = df_test.nlargest(10, 'score', keep='first')
+        print("Top 10 anomalies : \n", top_10)
+
+        # get max anomaly score and data inst
+        idxmax = df_test.idxmax()['score']
+        inst = df_test.iloc[idxmax]
+
+        #  and drop it from the test dataset
+        df_test.drop(df_test.index[idxmax], inplace=True)
+
+        # take feedback and update the weights of the trees
+        feedback = int(input("Enter feedback (1, -1) for data instance: {} => ".format(inst)))
+        fif.update_weights(hlim, feedback, lrate, inst)
 
 
 def test_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
