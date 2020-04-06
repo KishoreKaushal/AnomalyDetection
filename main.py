@@ -23,7 +23,6 @@ def parse_args():
     parser.add_argument('-s', '--subsamplesize', type=int, default=256, help='sampling rate for each tree, default 256')
     # parser.add_argument('-l', '--loss', type=str, default='linear', help='loss function linear or log-likelihood, default linear')
     parser.add_argument('-lr', '--lrate', type=float, help='learning rate of mirror descent algorithm')
-    parser.add_argument('-ts', '--testsize', type=float, default=0.05, help='test size in ration')
     parser.add_argument('-et', '--evaltrain', type=bool, default=False, help='whether to find accuracy on training data')
 
     required_named = parser.add_argument_group('required named arguments')
