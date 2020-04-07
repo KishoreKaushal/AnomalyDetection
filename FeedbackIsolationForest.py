@@ -44,7 +44,7 @@ class FeedbackIsolationForest(object):
         self.feedback_isolation_trees = None
         self.lrate = lrate
         
-        if df != None:
+        if df is not None:
             self.init_base(df)
 
     def init_base(self, df):
