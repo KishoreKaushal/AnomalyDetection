@@ -74,7 +74,11 @@ def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
     # feedback loop
     while(df_test.shape[0] > 1):
         # get score on test dataset
-        df_test['score'] = fif.score(df_test[df_test.columns[:-1]])
+        df_test['score'] = fif.score(df_test[df_test.columns[:-1]], hlim)
+
+        # print max and min anomaly score
+        print("max anomaly score: {}\n min anomaly score: {}"
+                .format(df_test['score'].min() , df_test['score'].max()))
 
         # print top 10 anomalies
         top_10 = df_test.nlargest(10, 'score', keep='first')
@@ -82,13 +86,13 @@ def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
 
         # get max anomaly score and data inst
         idxmax = df_test.idxmax()['score']
-        inst = df_test.iloc[idxmax]
+        inst = df_test.loc[idxmax]
 
         #  and drop it from the test dataset
         df_test.drop(df_test.index[idxmax], inplace=True)
 
         # take feedback and update the weights of the trees
-        feedback = int(input("Enter feedback (1, -1) for data instance: {} => ".format(inst)))
+        feedback = int(input("Enter feedback (1, -1) for data instance: \n{} \n=> ".format(inst)))
         fif.update_weights(hlim, feedback, lrate, inst)
 
 
@@ -138,23 +142,24 @@ def main():
     df.reset_index(inplace=True, drop=True)
 
 
-    df_train, df_test = train_test_split(df, test_size=args.testsize)
-    df_train.reset_index(inplace=True, drop=True)
-    df_test.reset_index(inplace=True, drop=True)
-
-    print("df_train.shape : ", df_train.shape)
-
-    col = df_train.columns[-1]
-
-    df_x_train, df_y_train = df_train.loc[:, :col], df_train.loc[:, col]
-    df_x_test, df_y_test = df_test.loc[:, :col], df_test.loc[:, col]
+    # df_train, df_test = train_test_split(df, test_size=args.testsize)
+    # df_train.reset_index(inplace=True, drop=True)
+    # df_test.reset_index(inplace=True, drop=True)
+    #
+    # print("df_train.shape : ", df_train.shape)
+    #
+    # col = df_train.columns[-1]
+    #
+    # df_x_train, df_y_train = df_train.loc[:, :col], df_train.loc[:, col]
+    # df_x_test, df_y_test = df_test.loc[:, :col], df_test.loc[:, col]
 
     if args.forest == 0:
-        test_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
-                  args.ntrees, args.subsamplesize, args.hlim, args.evaltrain)
+        pass
+        # test_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
+        #           args.ntrees, args.subsamplesize, args.hlim, args.evaltrain)
     else:
-        test_feedback_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
-                    args.ntrees, args.subsamplesize, args.hlim, args.lrate)
+        test_feedback_isolation_forest(df, args.ntrees,
+                    args.subsamplesize, args.hlim, args.lrate)
 
 
 if __name__ == '__main__':
