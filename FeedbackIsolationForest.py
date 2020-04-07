@@ -106,7 +106,7 @@ class FeedbackIsolationForest(object):
 
         return self
 
-    def score(self, df_inst):
+    def score(self, df_inst, hlim):
         """
         Return an array of scores of instances.
 
@@ -126,7 +126,7 @@ class FeedbackIsolationForest(object):
 
         # this can be parallelized -- using map function or using joblib
         # scores here is a 2D array of shape => (num_trees, num_df_inst)
-        path_lengths = np.array([tree.path_length(df_inst)
+        path_lengths = np.array([tree.path_length(df_inst, hlim)
                                  for tree in self.feedback_isolation_trees])
 
         # scores store sum of path length of an instance across all trees
