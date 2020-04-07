@@ -74,7 +74,7 @@ class FeedbackIsolationForest(object):
         subsamples = random.sample(range(num_inst), self.subsample_size * self.num_trees)
 
         # partitioning into self.num_trees equal chunks of size self.subsample_size
-        subsamples = np.array(subsamples).reshape(shape=(self.num_trees, self.subsample_size))
+        subsamples = np.array(subsamples).reshape((self.num_trees, self.subsample_size))
 
         # creating isolation trees -- this code can be parallelized -- using map function
         self.feedback_isolation_trees = [FeedbackIsolationTree().fit(df.loc[subsample])
