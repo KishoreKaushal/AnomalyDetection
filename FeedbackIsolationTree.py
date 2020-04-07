@@ -139,7 +139,7 @@ class FeedbackIsolationTree(object):
                 else:
                     curr_node = curr_node.right
 
-    def path_length(self, df_inst, hlim, n):
+    def path_length(self, df_inst, hlim):
         """
         Parameters:
         -----------
@@ -148,9 +148,6 @@ class FeedbackIsolationTree(object):
 
         hlim : numeric value
             Height Limit.
-
-        n : numeric value
-            Dataset size for estimating the size given the sample size.
 
         Return
         ------
