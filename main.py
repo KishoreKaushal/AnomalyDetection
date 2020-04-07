@@ -21,12 +21,10 @@ def parse_args():
     parser = argparse.ArgumentParser(add_help=True, description='testing feedback guided isolation forest model')
     parser.add_argument('-n', '--ntrees', type=int, default=128, help='number of trees in the forest, default 100')
     parser.add_argument('-s', '--subsamplesize', type=int, default=256, help='sampling rate for each tree, default 256')
-    # parser.add_argument('-l', '--loss', type=str, default='linear', help='loss function linear or log-likelihood, default linear')
     parser.add_argument('-lr', '--lrate', type=float, help='learning rate of mirror descent algorithm')
-    parser.add_argument('-et', '--evaltrain', type=bool, default=False, help='whether to find accuracy on training data')
-
     required_named = parser.add_argument_group('required named arguments')
 
+    required_named.add_argument('-f', '--forest', type=int, help='0 for normal iforest, otherwise feedback iforest', required=True)
     required_named.add_argument('-hl', '--hlim', type=int, help='height limit for tree', required=True)
     required_named.add_argument('-i', '--input', type=str, help='path of the input pickle file', required=True)
     # required_named.add_argument('-o', '--output', type=str, help='path for results file', required=True)
@@ -39,6 +37,7 @@ def online_update():
 
 def batch_update():
     pass
+
 
 def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
     """
@@ -150,11 +149,12 @@ def main():
     df_x_train, df_y_train = df_train.loc[:, :col], df_train.loc[:, col]
     df_x_test, df_y_test = df_test.loc[:, :col], df_test.loc[:, col]
 
-    test_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
-                          args.ntrees, args.subsamplesize, args.hlim, args.evaltrain)
-
-    test_feedback_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
-                                   args.ntrees, args.subsamplesize, args.hlim, args.lrate)
+    if args.forest == 0:
+        test_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
+                  args.ntrees, args.subsamplesize, args.hlim, args.evaltrain)
+    else:
+        test_feedback_isolation_forest(df_x_train, df_y_train, df_x_test, df_y_test,
+                    args.ntrees, args.subsamplesize, args.hlim, args.lrate)
 
 
 if __name__ == '__main__':
