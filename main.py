@@ -89,9 +89,6 @@ def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
         inst = df_test.loc[idxmax]
 
         #  and drop it from the test dataset
-        print("Dropping idx: {} with name: {}".format(df_test.index[idxmax], idxmax))
-        # print("instance to be dropped: \n", df_test[df_test.index[idxmax]])
-        # df_test.drop(df_test.index[idxmax], inplace=True)
         df_test.drop(labels=idxmax, inplace=True)
 
         print("Number of dataset left: {}".format(df_test.shape[0]))
