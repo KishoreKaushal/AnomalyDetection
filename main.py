@@ -77,7 +77,7 @@ def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
         df_test['score'] = fif.score(df_test[df_test.columns[:-1]], hlim)
 
         # print max and min anomaly score
-        print("max anomaly score: {}\n min anomaly score: {}"
+        print("min anomaly score: {}\nmax anomaly score: {}"
                 .format(df_test['score'].min() , df_test['score'].max()))
 
         # print top 10 anomalies
@@ -89,8 +89,12 @@ def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
         inst = df_test.loc[idxmax]
 
         #  and drop it from the test dataset
-        df_test.drop(df_test.index[idxmax], inplace=True)
+        print("Dropping idx: {} with name: {}".format(df_test.index[idxmax], idxmax))
+        # print("instance to be dropped: \n", df_test[df_test.index[idxmax]])
+        # df_test.drop(df_test.index[idxmax], inplace=True)
+        df_test.drop(labels=idxmax, inplace=True)
 
+        print("Number of dataset left: {}".format(df_test.shape[0]))
         # take feedback and update the weights of the trees
         feedback = int(input("Enter feedback (1, -1) for data instance: \n{} \n=> ".format(inst)))
         fif.update_weights(hlim, feedback, lrate, inst)
