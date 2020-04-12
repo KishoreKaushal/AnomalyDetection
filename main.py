@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument('-n', '--ntrees', type=int, default=128, help='number of trees in the forest, default 100')
     parser.add_argument('-s', '--subsamplesize', type=int, default=256, help='sampling rate for each tree, default 256')
     parser.add_argument('-lr', '--lrate', type=float, help='learning rate of mirror descent algorithm')
+    parser.add_argument('-tp', '--top', type=int, default=10, help='print top anomalies in each loop of iff')
     required_named = parser.add_argument_group('required named arguments')
 
     required_named.add_argument('-f', '--forest', type=int, help='0 for normal iforest, otherwise feedback iforest', required=True)
@@ -39,7 +40,7 @@ def batch_update():
     pass
 
 
-def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
+def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate, tp):
     """
     Parameters
     ----------
@@ -81,7 +82,7 @@ def test_feedback_isolation_forest(df, ntrees, subsamplesize, hlim, lrate):
                 .format(df_test['score'].min() , df_test['score'].max()))
 
         # print top 10 anomalies
-        top_10 = df_test.nlargest(10, 'score', keep='first')
+        top_10 = df_test.nlargest(tp, 'score', keep='first')
         print("Top 10 anomalies : \n", top_10)
 
         # get max anomaly score and data inst
@@ -160,7 +161,7 @@ def main():
         #           args.ntrees, args.subsamplesize, args.hlim, args.evaltrain)
     else:
         test_feedback_isolation_forest(df, args.ntrees,
-                    args.subsamplesize, args.hlim, args.lrate)
+                    args.subsamplesize, args.hlim, args.lrate, args.top)
 
 
 if __name__ == '__main__':
