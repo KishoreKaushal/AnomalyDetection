@@ -1,7 +1,9 @@
 from gensim import models
 import pandas as pd
 import numpy as np
+import pprint
 import multiprocessing
+from scipy.spatial import distance_matrix
 
 MAX_CORES = 6
 
@@ -34,4 +36,29 @@ def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
     return cat2vec_dict
 
 if __name__ == "__main__":
-    pass
+    pp = pprint.PrettyPrinter(indent=4)
+
+    cat_feature_list = ['d']
+
+    df = pd.read_pickle('./data/cat2vec.pickle')
+    cat2vec_dict = cat2vec(df, cat_list=cat_feature_list, num_bins=10, embd_size=4)
+
+    # printing the distance matrix for each features
+    for f in cat_feature_list:
+
+        val_ord = []
+        vec_list = []
+        dist_mat = None
+        for fv, embd in cat2vec_dict[f].items():
+            vec_list.append(embd)
+            val_ord.append(fv)
+
+        dist_mat = distance_matrix(vec_list, vec_list)
+
+        pp.pprint("----- Computing Distance matrix -----")
+        pp.pprint("Embeddings of the feature `{}`".format(f))
+        pp.pprint(cat2vec_dict[f])
+        pp.pprint("Unique value of feature `{}`".format(f))
+        pp.pprint(val_ord)
+        pp.pprint("Distance matrix:")
+        pp.pprint(np.round(dist_mat,2))
