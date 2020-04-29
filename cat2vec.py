@@ -1,3 +1,4 @@
+import argparse
 from gensim import models
 import pandas as pd
 import numpy as np
@@ -7,6 +8,14 @@ from scipy.spatial import distance_matrix
 
 
 MAX_CORES = 6
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(add_help=True, description='testing cat2vec')
+    required_named = parser.add_argument_group('required named arguments')
+    required_named.add_argument('-i', '--input', type=str, help='path of the input pickle file', required=True)
+    required_named.add_argument('-f', '--catfeat', type=str, help='features comma separated')
+    return parser.parse_args()
 
 
 def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
@@ -59,11 +68,12 @@ def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
     return cat2vec_dict
 
 if __name__ == "__main__":
+    args = parse_args()
+    df = pd.read_pickle(args.input)
+
+    cat_feature_list = [x.strip() for x in args.catfeat.split(',')]
+
     pp = pprint.PrettyPrinter(indent=4)
-
-    cat_feature_list = ['d']
-
-    df = pd.read_pickle('./data/cat2vec.pickle')
     cat2vec_dict = cat2vec(df, cat_list=cat_feature_list, num_bins=10, embd_size=4)
 
     # printing the distance matrix for each features
