@@ -5,9 +5,32 @@ import pprint
 import multiprocessing
 from scipy.spatial import distance_matrix
 
+
 MAX_CORES = 6
 
+
 def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
+    """
+    Returns a dictionary containing the vector embedding of
+    all unique values of the categorical features.
+
+    Parameters
+    ----------
+    df : pd.DataFrame (n_samples, n_features)
+        Tabular data.
+
+    num_bins : int, optional, default 10
+        Used to preprocess the continuous data to
+        convert to categorical data for word2vec model.
+
+    num_cores : 'auto' or int, optional, default 'auto'
+        Specify number of parallel jobs for word2vec model.
+        Default value 'auto' selects it according to following rule:
+        num_cores = min (MAX_CORES, TOTAL_CORES_AVAILABLE)
+
+    embd_size : int, optional, default 4
+        Specify the size of the embedding vector.
+    """
     if not isinstance(df, pd.DataFrame):
         raise TypeError('df should be of type pd.DataFrame')
 
