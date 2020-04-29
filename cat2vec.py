@@ -5,16 +5,15 @@ import multiprocessing
 
 MAX_CORES = 6
 
-def cat2vec(self, df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
+def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
     if not isinstance(df, pd.DataFrame):
         raise TypeError('df should be of type pd.DataFrame')
 
-    new_df = pd.DataFrame
+    new_df = pd.DataFrame()
 
     for col in df.columns:
         if col in cat_list: # categorical data
             new_df[col] = col + '-cat-' + df[col].astype(str)
-            pass
         else: # non-categorical data
             new_df[col] = col + '-bin-' + pd.cut(df[col], num_bins, labels=False).astype(str)
 
@@ -28,6 +27,11 @@ def cat2vec(self, df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
 
     cat2vec_dict = dict()
     for cat in cat_list:
-        dict[cat] = model[cat]
+        cat2vec_dict[cat] = dict()
+        for item in df[cat].unique():
+            cat2vec_dict[cat][item] = model.wv[str(cat)+'-cat-'+str(item)]
 
     return cat2vec_dict
+
+if __name__ == "__main__":
+    pass
