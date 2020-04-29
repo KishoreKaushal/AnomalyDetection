@@ -12,13 +12,17 @@ MAX_CORES = 6
 
 def parse_args():
     parser = argparse.ArgumentParser(add_help=True, description='testing cat2vec')
+    parser.add_argument('-j', '--jobs', type=int, default=-1, help='number of worker jobs')
+    parser.add_argument('-e', '--embdsize', type=int, default=4, help='size of embd vector')
+    parser.add_argument('-b', '--numbins', type=int, default=10, help='number of bins for '
+                                                                      'converting continuos data to categoical data')
     required_named = parser.add_argument_group('required named arguments')
     required_named.add_argument('-i', '--input', type=str, help='path of the input pickle file', required=True)
     required_named.add_argument('-f', '--catfeat', type=str, help='features comma separated')
     return parser.parse_args()
 
 
-def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
+def cat2vec(df, cat_list, num_bins=10, num_cores=-1, embd_size = 4):
     """
     Returns a dictionary containing the vector embedding of
     all unique values of the categorical features.
@@ -53,11 +57,11 @@ def cat2vec(df, cat_list, num_bins=10, num_cores='auto', embd_size = 4):
 
     sentence_list = new_df.values.tolist()
 
-    if num_cores == 'auto':
+    if num_cores <= 0:
         num_cores = min(MAX_CORES, multiprocessing.cpu_count())
 
     model = models.Word2Vec(sentence_list, min_count=1,
-                                     size=embd_size, workers=num_cores)
+                            size=embd_size, workers=num_cores)
 
     cat2vec_dict = dict()
     for cat in cat_list:
@@ -74,7 +78,10 @@ if __name__ == "__main__":
     cat_feature_list = [x.strip() for x in args.catfeat.split(',')]
 
     pp = pprint.PrettyPrinter(indent=4)
-    cat2vec_dict = cat2vec(df, cat_list=cat_feature_list, num_bins=10, embd_size=4)
+    cat2vec_dict = cat2vec(df, cat_list=cat_feature_list,
+                           num_bins=args.numbins,
+                           embd_size=args.embdsize,
+                           num_cores=args.jobs)
 
     # printing the distance matrix for each features
     for f in cat_feature_list:
