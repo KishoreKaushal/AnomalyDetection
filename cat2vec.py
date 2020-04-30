@@ -5,6 +5,8 @@ import numpy as np
 import pprint
 import multiprocessing
 from scipy.spatial import distance_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 MAX_CORES = 6
@@ -84,14 +86,18 @@ if __name__ == "__main__":
                            num_cores=args.jobs)
 
     # printing the distance matrix for each features
+    global_vec_list = []
+    global_vec_ord = []
     for f in cat_feature_list:
-
         val_ord = []
         vec_list = []
         dist_mat = None
         for fv, embd in cat2vec_dict[f].items():
             vec_list.append(embd)
             val_ord.append(fv)
+            global_vec_ord.append(str(f) + ":" + str(fv))
+
+        global_vec_list.extend(vec_list)
 
         dist_mat = distance_matrix(vec_list, vec_list)
 
@@ -102,3 +108,17 @@ if __name__ == "__main__":
         pp.pprint(val_ord)
         pp.pprint("Distance matrix:")
         pp.pprint(np.round(dist_mat,2))
+
+    # printing the complete distance matrix.
+    dist_mat = distance_matrix(global_vec_list, global_vec_list)
+    pp.pprint("----- Computing Distance matrix (inter features) -----")
+    pp.pprint("Order of the embeddings: ")
+    pp.pprint(global_vec_ord)
+    pp.pprint("Distance matrix:")
+    pp.pprint(np.round(dist_mat, 2))
+    sns.heatmap(dist_mat, annot=True,
+                xticklabels=global_vec_ord,
+                yticklabels=global_vec_ord,
+                fmt='.2f',
+                cbar=False)
+    plt.show()
