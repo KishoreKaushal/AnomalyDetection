@@ -80,7 +80,7 @@ class FeedbackIsolationTree(object):
         self.size = num_inst
         self.df = df
 
-        self.splitting_attr = df.columns[random.randint(0, num_attr - 2)]
+        self.splitting_attr = df.columns[random.randint(0, num_attr - 1)]
         self.splitting_attr_range = [df[self.splitting_attr].min(),
                                      df[self.splitting_attr].max()]
 
