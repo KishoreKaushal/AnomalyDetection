@@ -90,7 +90,8 @@ def test_feedback_isolation_forest(df_train, df_test, ntrees, subsamplesize, hli
         print("Top 10 anomalies : \n", top_10)
 
         # get max anomaly score and data inst
-        idxmax = df_test.idxmax()['score']
+        idxmax = df_test['score'].idxmax()
+
         inst = df_test.loc[idxmax]
 
         #  and drop it from the test dataset
@@ -132,6 +133,7 @@ def main():
 
     df = pd.read_pickle(args.input)
 
+
     # generate the list of exluded columns for training
     exclude_col_for_train = []
     for x in args.excludecolidx.split(','):
@@ -139,11 +141,14 @@ def main():
             exclude_col_for_train.append(df.columns[int(x.strip())])
 
     df_train = df.drop(columns=exclude_col_for_train)
+    df_train = shuffle(df_train)
+    df_train.reset_index(inplace=True, drop=True)
 
     if args.testdata == '':
         df_test = df_train
     else:
         df_test = pd.read_pickle(args.testdata)
+        df_test.reset_index(inplace=True, drop=True)
 
     if args.forest == 0:
         pass
