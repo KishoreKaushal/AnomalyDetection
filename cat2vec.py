@@ -7,7 +7,8 @@ import multiprocessing
 from scipy.spatial import distance_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import pickle
+from os import path
 
 MAX_CORES = 6
 
@@ -85,6 +86,9 @@ if __name__ == "__main__":
                            embd_size=args.embdsize,
                            num_cores=args.jobs)
 
+    with open(path.join('temp', path.basename(args.input)+'_embd.pkl'), 'wb') as handle:
+        pickle.dump(cat2vec_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     # printing the distance matrix for each features
     global_vec_list = []
     global_vec_ord = []
@@ -121,4 +125,5 @@ if __name__ == "__main__":
                 yticklabels=global_vec_ord,
                 fmt='.2f',
                 cbar=False)
+    plt.savefig(path.join('temp', path.basename(args.input)+'_dist_mat.png'))
     plt.show()
