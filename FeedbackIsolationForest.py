@@ -77,7 +77,7 @@ class FeedbackIsolationForest(object):
         subsamples = np.array(subsamples).reshape((self.num_trees, self.subsample_size))
 
         # creating isolation trees -- this code can be parallelized -- using map function
-        self.feedback_isolation_trees = [FeedbackIsolationTree().fit(df.loc[subsample])
+        self.feedback_isolation_trees = [FeedbackIsolationTree().fit(df.iloc[subsample])
                                 for subsample in subsamples]
 
         return self
