@@ -25,6 +25,26 @@ def parse_args():
     return parser.parse_args()
 
 
+def vector_embedding(df, cat_feat, cat2vec_dict, drop=True):
+    df = df.copy()
+    # prepare the columns for the vector embedding
+    # for f in cat_feat:
+    #     for i in range(embd_size):
+    #         df["{}_{}".format(f, i)] = 0.0
+
+    # insert the embedding for all the features
+    for f in cat_feat:
+        for fv, embd in cat2vec_dict[f].items():
+            for i in range(len(embd)):
+                df.loc[df[f] == fv, "{}_{}".format(f, i)] = embd[i]
+
+    # once inserted drop the original columns
+    if drop:
+        return df.drop(columns=cat_feat)
+
+    return df
+
+
 def cat2vec(df, cat_list, num_bins=10, num_cores=-1, embd_size = 4):
     """
     Returns a dictionary containing the vector embedding of
@@ -127,3 +147,8 @@ if __name__ == "__main__":
                 cbar=False)
     plt.savefig(path.join('temp', path.basename(args.input)+'_dist_mat.png'))
     plt.show()
+
+    # save the dataframe to pickle file
+    df_new = vector_embedding(df, cat_feature_list, args.embdsize, cat2vec_dict)
+    df_new.to_pickle(path.join('data', path.basename(args.input)+'_embd.pkl'))
+
