@@ -45,10 +45,29 @@ def ahist_s(arr, count, max_buckets, eps):
                                  seen_points ])
 
         for k in range(1, max_buckets):
-            # TODO - complete this part
+            err_of_best_hist[k] = err_of_best_hist[k-1]
+            a_val = j + 1
 
             for b_val in b_values[k-1].keys():
-                pass
+                if b_val < j:
+                    _, b_err, b_sum, b_sqr, b_pts = b_values[k-1][b_val]
+                    tmp_err = b_err + accumulated_sqr_sum - b_sqr \
+                              - (accumulated_sum - b_sum)**2 / (seen_points - b_pts)
+
+                    if tmp_err < err_of_best_hist[k]:
+                        err_of_best_hist[k] = tmp_err
+                        a_val = b_val + 1
+
+            b_values[k][j] = tuple([ a_val,
+                                     err_of_best_hist[0],
+                                     accumulated_sum,
+                                     accumulated_sqr_sum,
+                                     seen_points ])
+
+            if err_of_best_hist[k] > (1 + eps) * approx_err[k]:
+                approx_err[k] = err_of_best_hist[k]
+            else:
+                del b_values[k][j-1]
 
     return err_of_best_hist, b_values
 
