@@ -3,6 +3,8 @@ import pandas as pd
 from random import sample
 from PIDTree import PIDTree
 
+DELTA = 1e-5
+
 class PIDForest(object):
 
     def __init__(self, copy_x : bool = True, **kwargs):
@@ -20,7 +22,6 @@ class PIDForest(object):
 
     def fit(self, df):
 
-
         self.df = df
 
         if not isinstance(self.df, pd.DataFrame):
@@ -37,6 +38,14 @@ class PIDForest(object):
 
         # partitioning into self.num_trees equal chunks of size self.subsample_size
         subsamples = np.array(subsamples).reshape((self.num_trees, self.subsample_size))
+
+
+        # setting the initial interval
+        self.interval = dict()
+        for col in df.columns:
+            if len(pd.unique(df[col])) <= 1:
+                raise ValueError("No entropy in the column: ", col)
+            self.interval[col] = (df[col].min() - DELTA, df[col].max() + DELTA)
 
         # TODO - complete this code to create PIDTrees
         self.pid_trees = [_ for subsample in subsamples]
