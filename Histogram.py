@@ -7,9 +7,31 @@ class Histogram():
         self.max_buckets = max_buckets
         self.arr = arr
         self.eps = eps
+        self.err, self.b_values = ahist_s(arr, count, max_buckets, eps)
 
     def get_buckets(self, num_buckets):
-        pass
+        buckets = []
+        end = self.num - 1
+        k = num_buckets - 1
+        while end >= 0:
+            start = int(self.b_values[k][end][0])
+            if start <= end:
+                buckets.append(start)
+            end = start - 1
+            k -= 1
+        return np.flip(buckets, axis=0)
+
+    def best_split(self):
+        if self.err[0] == 0:
+            return 0, 0, []
+        err_red = [(self.err[0] - self.err[i]) for i in range(1, self.max_buckets)]
+        var_red = np.max(err_red) / self.err[0]
+        if var_red < 0:
+            print("error: var_red is", var_red)
+            var_red = 0
+        opt = np.argmax(err_red) + 2
+        buckets = self.get_buckets(opt)
+        return opt, var_red, buckets[1:]
 
 
 
@@ -30,6 +52,11 @@ def ahist_s(arr, count, max_buckets, eps):
         accumulated_sum += arr[j] * count[j]
         accumulated_sqr_sum += (arr[j]**2) * count[j]
         seen_points += count[j]
+
+
+        # for one bucket minimum error is with mean of data points
+        # refer Guha Et. Al 2006 -- equation 2
+        # err_of_best_hist[0] -- means error of best histogram with only one bucket
 
         err_of_best_hist[0] = accumulated_sqr_sum - (accumulated_sum**2)/seen_points
 
@@ -59,7 +86,7 @@ def ahist_s(arr, count, max_buckets, eps):
                         a_val = b_val + 1
 
             b_values[k][j] = tuple([ a_val,
-                                     err_of_best_hist[0],
+                                     err_of_best_hist[k],
                                      accumulated_sum,
                                      accumulated_sqr_sum,
                                      seen_points ])
