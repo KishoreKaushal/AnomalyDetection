@@ -2,16 +2,55 @@ import numpy as np
 
 class Histogram():
 
-    def __init__(self, val, count, max_buckets, eps):
-        self.num = len(val)
+    def __init__(self, arr, count, max_buckets, eps):
+        self.num = len(arr)
         self.max_buckets = max_buckets
-        self.val = val
+        self.arr = arr
         self.eps = eps
 
     def get_buckets(self, num_buckets):
         pass
 
 
+
+def ahist_s(arr, count, max_buckets, eps):
+
+    approx_err = np.zeros(max_buckets) - 1
+
+    # error of best histogram with k buckets
+    err_of_best_hist = np.zeros(max_buckets)
+
+    b_values = [dict() for _ in range(max_buckets)]
+
+    accumulated_sum = 0
+    accumulated_sqr_sum = 0
+    seen_points = 0
+
+    for j in range(len(arr)):
+        accumulated_sum += arr[j] * count[j]
+        accumulated_sqr_sum += (arr[j]**2) * count[j]
+        seen_points += count[j]
+
+        err_of_best_hist[0] = accumulated_sqr_sum - (accumulated_sum**2)/seen_points
+
+        if err_of_best_hist[0] > (1 + eps) * approx_err[0]:
+            approx_err[0] = err_of_best_hist[0]
+        else:
+            del b_values[0][j-1]
+
+        b_values[0][j] = tuple([ 0,
+                                 err_of_best_hist[0],
+                                 accumulated_sum,
+                                 accumulated_sqr_sum,
+                                 seen_points ])
+
+        for k in range(1, max_buckets):
+            # TODO - complete this part
+
+            for b_val in b_values[k-1].keys():
+                pass
+
+    return err_of_best_hist, b_values
 
 
 
