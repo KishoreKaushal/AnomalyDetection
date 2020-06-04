@@ -136,4 +136,10 @@ def ahist_s(arr, count, max_buckets, eps):
 #                 b_l = j
 
 
-
+# sample usage
+if __name__ == "__main__":
+    np.random.seed(0)
+    arr = np.random.randint(low=1, high=30, size=(100,))
+    arr, cnt = np.unique(arr, return_counts=True)
+    hist = Histogram(arr, cnt, 10, 0.1)
+    print(hist.best_split())
