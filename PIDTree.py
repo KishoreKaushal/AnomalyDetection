@@ -4,6 +4,7 @@ from Cube import Cube
 from PIDForest import PIDForest
 import pandas as pd
 import numpy as np
+import copy
 
 
 class PIDTree(object):
@@ -56,5 +57,19 @@ class PIDTree(object):
         self.cube.split_vals = [(self.point_set.val[split_attr][i - 1] + self.point_set.val[split_attr][i]) / 2
                                 for i in buckets[split_attr]]
 
-        #TODO - write code for creating child nodes
-        pass
+        splits_df, new_start, new_end = self.cube.split_df(df=self.point_set.df)
+
+        for i in range(len(splits_df)):
+            new_id = copy.deepcopy(self.node_id)
+            new_id.append(i)
+            kwargs = {
+                'depth' : self.depth + 1,
+                'forest' : self.forest,
+                'start' : new_start[i],
+                'end' : new_end[i],
+                'df' : splits_df[i],
+                'id' : new_id
+            }
+            child_node = PIDTree(**kwargs)
+            self.child.append(child_node)
+            self.cube.child.append(child_node.cube)
