@@ -30,7 +30,7 @@ class Cube(object):
                                       & (df_filtered[col] <= self.end[col])]
 
         return df_filtered
-    
+
 
     def split_df(self, df):
         num_child = len(self.child)
