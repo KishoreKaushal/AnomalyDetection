@@ -1,5 +1,6 @@
 from PIDTree import PIDTree
 import numpy as np
+import pandas as pd
 
 class Cube(object):
 
@@ -20,3 +21,12 @@ class Cube(object):
             self.vol += np.log(self.end[i] - self.start[i])
 
 
+    def filter_df(self, df):
+        assert isinstance(df, pd.DataFrame)
+
+        df_filtered = df.copy()
+        for col in df.columns:
+            df_filtered = df_filtered[(self.start[col] <= df_filtered[col])
+                                      & (df_filtered[col] <= self.end[col])]
+
+        return df_filtered
