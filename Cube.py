@@ -12,7 +12,7 @@ class Cube(object):
         self.start = start
         self.end = end
         self.num_attr = len(start)
-        self.split_axis = -1
+        self.split_attr = None
         self.split_vals = []
 
         # calculating the log-volume of the subcube
@@ -30,3 +30,28 @@ class Cube(object):
                                       & (df_filtered[col] <= self.end[col])]
 
         return df_filtered
+    
+
+    def split_df(self, df):
+        num_child = len(self.child)
+
+        # if no child nodes, we can't split
+        if num_child == 0:
+            return df
+
+        splits = [[] for _ in range(num_child)]
+
+        if df.shape[0] == 0:
+            return splits
+
+        splits[0] = df[(self.start[self.split_attr] <= df[self.split_attr])
+                          & (df[self.split_attr] < self.split_vals[0])]
+
+        splits[-1] = df[(self.split_vals[-1] <= df[self.split_attr])
+                          & (df[self.split_attr] < self.end[self.split_attr])]
+
+        for k in range(1, num_child - 1):
+            splits[k] = df[(self.split_vals[k-1] <= df[self.split_attr])
+                          & (df[self.split_attr] < self.split_vals[k])]
+
+        return splits
