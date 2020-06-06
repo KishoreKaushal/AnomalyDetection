@@ -6,15 +6,15 @@ from .Histogram import Histogram
 
 DELTA = 1e-3
 
+
 class PIDForest(object):
 
-    def __init__(self, copy_x : bool = True, **kwargs):
+    def __init__(self, copy_x: bool = True, **kwargs):
         self.num_trees = kwargs['num_trees']
         self.max_depth = kwargs['max_depth']
         self.subsample_size = kwargs['subsample_size']
         self.max_buckets = kwargs['max_buckets']
         self.epsilon = kwargs['epsilon']
-        self.sample_axis = kwargs['sample_axis']
         self.threshold = kwargs['threshold']
         self.copy_x = copy_x
         self.n_leaves = np.zeros(self.num_trees)
@@ -23,11 +23,11 @@ class PIDForest(object):
         self.num_inst = None
         self.start = dict()
         self.end = dict()
-
+        self.df = None
 
     def fit(self, df):
 
-        self.df = df
+        self.df = df.copy()
 
         if not isinstance(self.df, pd.DataFrame):
             self.df = pd.DataFrame(data=self.df)
@@ -43,7 +43,6 @@ class PIDForest(object):
 
         # partitioning into self.num_trees equal chunks of size self.subsample_size
         subsamples = np.array(subsamples).reshape((self.num_trees, self.subsample_size))
-
 
         # setting the initial interval
         for col in df.columns:
@@ -96,9 +95,8 @@ class Cube(object):
 
         # calculating the log-volume of the subcube
         self.vol = 0
-        for i in range(self.num_attr):
-            self.vol += np.log(self.end[i] - self.start[i])
-
+        for key in self.start.keys():
+            self.vol += np.log(self.end[key] - self.start[key])
 
     def filter_df(self, df):
         assert isinstance(df, pd.DataFrame)
@@ -109,7 +107,6 @@ class Cube(object):
                                       & (df_filtered[col] <= self.end[col])]
 
         return df_filtered
-
 
     def split_df(self, df):
         num_child = len(self.child)
@@ -123,40 +120,38 @@ class Cube(object):
         if df.shape[0] == 0:
             return splits
 
-        # start and end of the interval for each split
-        new_start = [copy.deepcopy(self.start) for _ in range(num_child)]
-        new_end = [copy.deepcopy(self.end) for _ in range(num_child)]
-
-
-        # new interval for first split
-        # new_start[0][self.split_attr] = self.start[self.split_attr]
-        new_end[0][self.split_attr] = self.split_vals[0]
-
-        # new interval for last split
-        new_start[-1][self.split_attr] = self.split_vals[-1]
-        # new_end[-1][self.split_attr] = self.end[self.split_attr]
-
-        # new interval for the ith split: 0 < i < num_child - 1
-        for i in range(1, num_child-1):
-            new_start[i][self.split_attr] = self.split_vals[i-1]
-            new_end[i][self.split_attr] = self.split_vals[i]
-
-        splits = [df[(new_start[i][self.split_attr] <= df[self.split_attr])
-                    & (df[self.split_attr] <= new_end[i][self.split_attr])]
-                    for i in range(num_child)]
+        # # start and end of the interval for each split
+        # new_start = [copy.deepcopy(self.start) for _ in range(num_child)]
+        # new_end = [copy.deepcopy(self.end) for _ in range(num_child)]
         #
+        # # new interval for first split
+        # # new_start[0][self.split_attr] = self.start[self.split_attr]
+        # new_end[0][self.split_attr] = self.split_vals[0]
         #
-        # splits[0] = df[(self.start[self.split_attr] <= df[self.split_attr])
-        #                   & (df[self.split_attr] < self.split_vals[0])]
+        # # new interval for last split
+        # new_start[-1][self.split_attr] = self.split_vals[-1]
+        # # new_end[-1][self.split_attr] = self.end[self.split_attr]
         #
-        # splits[-1] = df[(self.split_vals[-1] <= df[self.split_attr])
-        #                   & (df[self.split_attr] < self.end[self.split_attr])]
+        # # new interval for the ith split: 0 < i < num_child - 1
+        # for i in range(1, num_child-1):
+        #     new_start[i][self.split_attr] = self.split_vals[i-1]
+        #     new_end[i][self.split_attr] = self.split_vals[i]
         #
-        # for k in range(1, num_child - 1):
-        #     splits[k] = df[(self.split_vals[k-1] <= df[self.split_attr])
-        #                   & (df[self.split_attr] < self.split_vals[k])]
+        # splits = [df[(new_start[i][self.split_attr] <= df[self.split_attr])
+        #             & (df[self.split_attr] <= new_end[i][self.split_attr])]
+        #             for i in range(num_child)]
 
-        return (splits, new_start, new_end)
+        splits[0] = df[(self.start[self.split_attr] <= df[self.split_attr])
+                          & (df[self.split_attr] < self.split_vals[0])]
+
+        splits[-1] = df[(self.split_vals[-1] <= df[self.split_attr])
+                          & (df[self.split_attr] < self.end[self.split_attr])]
+
+        for k in range(1, num_child - 1):
+            splits[k] = df[(self.split_vals[k-1] <= df[self.split_attr])
+                          & (df[self.split_attr] < self.split_vals[k])]
+
+        return splits
 
 
 class PIDTree(object):
@@ -211,9 +206,31 @@ class PIDTree(object):
         self.cube.split_vals = [(self.point_set.val[split_attr][i - 1] + self.point_set.val[split_attr][i]) / 2
                                 for i in buckets[split_attr]]
 
-        splits_df, new_start, new_end = self.cube.split_df(df=self.point_set.df)
 
-        for i in range(len(splits_df)):
+        # this code will not work because childs are not created yet
+        # splits_df, new_start, new_end = self.cube.split_df(df=self.point_set.df)
+
+        # start and end of the interval for each split
+        new_start = [copy.deepcopy(self.cube.start) for _ in range(self.forest.num_child)]
+        new_end = [copy.deepcopy(self.cube.end) for _ in range(self.forest.num_child)]
+
+        # new interval for first split
+        # new_start[0][self.split_attr] = self.start[self.split_attr]
+        new_end[0][self.cube.split_attr] = self.cube.split_vals[0]
+
+        # new interval for last split
+        new_start[-1][self.cube.split_attr] = self.cube.split_vals[-1]
+        # new_end[-1][self.split_attr] = self.end[self.split_attr]
+
+        # new interval for the ith split: 0 < i < num_child - 1
+        for i in range(1, self.forest.num_child - 1):
+            new_start[i][self.cube.split_attr] = self.cube.split_vals[i - 1]
+            new_end[i][self.cube.split_attr] = self.cube.split_vals[i]
+
+        for i in range(self.forest.num_child):
+            df_child = self.point_set.df[(new_start[i][self.cube.split_attr] <= self.point_set.df[self.cube.split_attr])
+                    & (self.point_set.df[self.cube.split_attr] <= new_end[i][self.cube.split_attr])]
+
             new_id = copy.deepcopy(self.node_id)
             new_id.append(i)
             kwargs = {
@@ -221,7 +238,7 @@ class PIDTree(object):
                 'forest' : self.forest,
                 'start' : new_start[i],
                 'end' : new_end[i],
-                'df' : splits_df[i],
+                'df' : df_child,
                 'id' : new_id
             }
             child_node = PIDTree(**kwargs)
@@ -255,7 +272,7 @@ class PointSet(object):
         self.count = {}
         self.gap = {}
 
-        for col in range(self.df.columns):
+        for col in self.df.columns:
             val, count = np.unique(self.df[col], return_counts=True)
             self.val[col] = val
             self.count[col] = count
