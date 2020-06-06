@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 import copy
-from Histogram import Histogram
+from .Histogram import Histogram
 
 DELTA = 1e-3
 
