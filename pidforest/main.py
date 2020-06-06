@@ -7,12 +7,13 @@ test_data_path = "/home/kaushal/Documents/AnomalyDetection/Data/cat2vec_test.pic
 
 df_train = pd.read_pickle(train_data_path)
 df_test = pd.read_pickle(test_data_path)
+df_test = df_test[:10]
 X_train = df_train.values
 X_test = df_test.values
 
 kwargs = {
 'max_depth': 10,
-'num_trees': 100,
+'num_trees': 10,
 'subsample_size': 100,
 'max_buckets': 5,
 'epsilon': 0.1,
@@ -21,3 +22,4 @@ kwargs = {
 
 forest = PIDForest(**kwargs).fit(df_train)
 df_score = forest.score(df_test)
+df_score.to_pickle('temp/result.pickle')
