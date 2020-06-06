@@ -3,7 +3,7 @@ import pandas as pd
 import random
 from PIDTree import PIDTree
 
-DELTA = 1e-5
+DELTA = 1e-3
 
 class PIDForest(object):
 
@@ -63,6 +63,21 @@ class PIDForest(object):
             self.pid_trees.append(PIDTree(**kwargs))
 
         return self
+
+    def score(self, df, percentile=85):
+        assert isinstance(df, pd.DataFrame)
+
+        df = df.copy()
+        tree_score_col = []
+        for i in range(self.num_trees):
+            new_col_name = 'anomaly_score_tree_' + str(i)
+            tree_score_col.append(new_col_name)
+            df[new_col_name] = 0.0
+            self.pid_trees[i].set_pid_score(df, score_col_name=new_col_name)
+
+        df['anomaly_score'] = df[tree_score_col].quantile(q=percentile, axis=1)
+
+        return df['anomaly_score']
 
 
 
