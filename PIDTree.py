@@ -81,3 +81,14 @@ class PIDTree(object):
             self.sparsity = self.cube.vol - np.log(self.point_set.df.shape[0])
         else: # sparsity not matters for internal nodes
             self.sparsity = -1
+
+    def set_score(self, df, score_col_name):
+        if self.depth == 0:
+            df = self.cube.filter_df(df)
+
+        if len(self.child) != 0:
+            split_df = self.cube.split_df(df)
+            for i in range(len(split_df)):
+                self.child[i].set_score(split_df[i])
+        else:
+            df[score_col_name] = (-1 / self.sparsity)
