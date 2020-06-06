@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from random import sample
+import random
 from PIDTree import PIDTree
 
 DELTA = 1e-5
@@ -18,6 +18,10 @@ class PIDForest(object):
         self.copy_x = copy_x
         self.n_leaves = np.zeros(self.num_trees)
         self.pid_trees = None
+        self.num_attr = None
+        self.num_inst = None
+        self.start = dict()
+        self.end = dict()
 
 
     def fit(self, df):
@@ -27,28 +31,36 @@ class PIDForest(object):
         if not isinstance(self.df, pd.DataFrame):
             self.df = pd.DataFrame(data=self.df)
 
-        num_inst, num_attr = self.df.shape
+        self.num_inst, self.num_attr = self.df.shape
 
-        if self.subsample_size * self.num_trees > num_inst:
+        if self.subsample_size * self.num_trees > self.num_inst:
             raise ValueError("subsample_size ({}) * num_trees ({}) is greater than "
                              "number of instances ({}) in the dataset."
-                             .format(self.subsample_size, self.num_trees, num_inst))
+                             .format(self.subsample_size, self.num_trees, self.num_inst))
 
-        subsamples = sample(range(num_inst), self.subsample_size * self.num_trees)
+        subsamples = random.sample(range(self.num_inst), self.subsample_size * self.num_trees)
 
         # partitioning into self.num_trees equal chunks of size self.subsample_size
         subsamples = np.array(subsamples).reshape((self.num_trees, self.subsample_size))
 
 
         # setting the initial interval
-        self.interval = dict()
         for col in df.columns:
             if len(pd.unique(df[col])) <= 1:
                 raise ValueError("No entropy in the column: ", col)
-            self.interval[col] = (df[col].min() - DELTA, df[col].max() + DELTA)
+            self.start[col], self.end[col] = (df[col].min() - DELTA, df[col].max() + DELTA)
 
-        # TODO - complete this code to create PIDTrees
-        self.pid_trees = [_ for subsample in subsamples]
+        self.pid_trees = []
+        for i in range(len(subsamples)):
+            kwargs = {
+                'depth': 0,
+                'forest': self,
+                'start': self.start,
+                'end': self.end,
+                'df': self.df.iloc[subsamples[i]],
+                'id': [i, 0]
+            }
+            self.pid_trees.append(PIDTree(**kwargs))
 
         return self
 
