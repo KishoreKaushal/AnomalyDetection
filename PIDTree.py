@@ -25,10 +25,12 @@ class PIDTree(object):
             self.cube = Cube(node=self, start=kwargs['start'], end=kwargs['end'])
             self.point_set = PointSet(node=self, df=self.cube.filter_df(kwargs['df']))
 
-        self.density = -1
+        self.sparsity = -1
         self.child = []
         if (self.depth < self.forest.max_depth) and (len(self.point_set.df) > 1):
             self.find_split()
+        else: # compute sparsity of the leaf node
+            self.compute_sparsity()
 
 
     def find_split(self):
@@ -73,3 +75,9 @@ class PIDTree(object):
             child_node = PIDTree(**kwargs)
             self.child.append(child_node)
             self.cube.child.append(child_node.cube)
+
+    def compute_sparsity(self):
+        if len(self.child) == 0:
+            self.sparsity = self.cube.vol - np.log(self.point_set.df.shape[0])
+        else: # sparsity not matters for internal nodes
+            self.sparsity = -1
