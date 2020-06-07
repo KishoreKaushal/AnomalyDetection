@@ -6,6 +6,7 @@ from .Histogram import Histogram
 
 DELTA = 1e-3
 
+# TODO -- change anomaly metrics to negative of density due to precision issues
 
 class PIDForest(object):
 
