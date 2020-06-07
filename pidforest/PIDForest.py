@@ -113,16 +113,6 @@ class Cube(object):
 
         return df_filtered
 
-    def filter_df2(self, df, copy_x=False):
-        assert isinstance(df, pd.DataFrame)
-        df_filtered = df
-
-        # for col in self.node.forest.df.columns:
-        #     df_filtered = df_filtered[(self.start[col] <= df_filtered[col])
-        #                               & (df_filtered[col] < self.end[col])]
-        return  df_filtered
-
-
     def split_df(self, df):
         num_child = len(self.child)
 
@@ -134,27 +124,6 @@ class Cube(object):
 
         if df.shape[0] == 0:
             return splits
-
-        # # start and end of the interval for each split
-        # new_start = [copy.deepcopy(self.start) for _ in range(num_child)]
-        # new_end = [copy.deepcopy(self.end) for _ in range(num_child)]
-        #
-        # # new interval for first split
-        # # new_start[0][self.split_attr] = self.start[self.split_attr]
-        # new_end[0][self.split_attr] = self.split_vals[0]
-        #
-        # # new interval for last split
-        # new_start[-1][self.split_attr] = self.split_vals[-1]
-        # # new_end[-1][self.split_attr] = self.end[self.split_attr]
-        #
-        # # new interval for the ith split: 0 < i < num_child - 1
-        # for i in range(1, num_child-1):
-        #     new_start[i][self.split_attr] = self.split_vals[i-1]
-        #     new_end[i][self.split_attr] = self.split_vals[i]
-        #
-        # splits = [df[(new_start[i][self.split_attr] <= df[self.split_attr])
-        #             & (df[self.split_attr] <= new_end[i][self.split_attr])]
-        #             for i in range(num_child)]
 
         splits[0] = df[(self.start[self.split_attr] <= df[self.split_attr])
                           & (df[self.split_attr] < self.split_vals[0])]
@@ -268,21 +237,18 @@ class PIDTree(object):
             self.sparsity = -1
 
     def set_score(self, df, score_col_name):
-        if self.depth == 0:
-            df = self.cube.filter_df2(df, copy_x=False)
+        # if self.depth == 0:
+        #     df_filtered = self.cube.filter_df(df, copy_x=False)
 
-
-        df[score_col_name] = -1000
-
-        # if len(self.child) != 0:
-        #     split_df = self.cube.split_df(df)
-        #     for i in range(len(split_df)):
-        #         if split_df[i].shape[0] != 0:
-        #             self.child[i].set_score(split_df[i], score_col_name)
-        # else:
-        #     if df.shape[0] != 0:
-        #         df[score_col_name] = (-1 / self.sparsity)
-        #         print(df)
+        if len(self.child) != 0:
+            split_df = self.cube.split_df(df)
+            for i in range(len(split_df)):
+                if split_df[i].shape[0] != 0:
+                    self.child[i].set_score(split_df[i], score_col_name)
+                    df.loc[split_df[i].index.to_list(), score_col_name] = split_df[i][score_col_name]
+        else:
+            if df.shape[0] != 0:
+                df[score_col_name] = (-1 / self.sparsity)
 
 
 class PointSet(object):
