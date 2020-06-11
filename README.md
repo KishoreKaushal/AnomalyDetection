@@ -1,5 +1,7 @@
 # AnomalyDetection
 
+Find the report here: https://github.com/KishoreKaushal/btp-report/blob/master/latex/btp_report.pdf
+
 ## Isolation forest usage
 
 ```bash
