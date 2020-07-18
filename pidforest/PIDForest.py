@@ -4,8 +4,10 @@ import random
 import copy
 from Histogram import Histogram
 import pickle
+from pathlib import Path
 import os
 from datetime import datetime
+from tqdm import tqdm
 
 DELTA = 1e-3
 
@@ -289,20 +291,25 @@ def save_pidforest_model(pidforest, base_dir='./'):
     dir = os.path.join(base_dir, timestamp_str)
 
     # create new directory
-    if os.path.exists(dir):
-        os.mkdir(dir)
+    Path(dir).mkdir(parents=True, exist_ok=True)
 
+    print("Directory checked...")
+
+    # if not os.path.exists(dir):
+    #     os.mkdir(dir)
+
+    print("Saving trees at root dir: {}...".format(dir))
+    # save individual trees to separate pickle files
+    pidtrees = pidforest.pid_trees
+
+    for i in tqdm(range(len(pidtrees)), ncols=50):
+        tree = pidtrees[i]
+        pidtree_pkl = os.path.join(base_dir, timestamp_str, "pidtree_{}.pkl".format(i))
+        with open(pidtree_pkl, "wb") as pfile:
+            pickle.dump(tree, pfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+    print("Saving pidforest model...")
     # save the pidforest object
     pidforest_pkl = os.path.join(base_dir, timestamp_str, "pidforest.pkl")
     with open(pidforest_pkl, "wb") as pfile:
         pickle.dump(pidforest, pfile, protocol=pickle.HIGHEST_PROTOCOL)
-
-    # save individual trees to separate pickle files
-    pidtrees = pidforest.pid_trees
-
-    for tree in pidtrees:
-        tree_id = "_".join(map(str, tree.node_id))
-        pidtree_pkl = os.path.join(base_dir, timestamp_str, "pidtree_{}.pkl".format(tree_id))
-
-        with open(pidtree_pkl, "wb") as pfile:
-            pickle.dump(tree, pfile, protocol=pickle.HIGHEST_PROTOCOL)

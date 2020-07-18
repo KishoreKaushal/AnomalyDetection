@@ -2,7 +2,7 @@ import pprint
 import time
 
 import pandas as pd
-from PIDForest import PIDForest
+from PIDForest import PIDForest, save_pidforest_model
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
 
@@ -69,7 +69,7 @@ X_test = df_test.values
 
 kwargs = {
 'max_depth': 10,
-'num_trees': 128,
+'num_trees': 50,
 'subsample_size': 128,
 'max_buckets': 5,
 'epsilon': 0.1,
@@ -83,14 +83,19 @@ t0 = time.time()
 forest = PIDForest(**kwargs).fit(df_train)
 print("Training pidforest time: {}",format(time.time() - t0))
 
-t0 = time.time()
+# save the model
+save_pidforest_model(forest, '/home/kaushal/temp/')
 
-df_score = forest.score(df_test, percentile=0.85)
-print("Testing time on df_test.shape {}  : {}".format(df_test.shape, time.time() - t0))
 
-df_test['score'] = df_score
-df_test.sort_values('score', ascending=False, inplace=True)
-df_test.to_csv('temp/suchith_result.csv')
+#
+# t0 = time.time()
+#
+# df_score = forest.score(df_test, percentile=0.85)
+# print("Testing time on df_test.shape {}  : {}".format(df_test.shape, time.time() - t0))
+#
+# df_test['score'] = df_score
+# df_test.sort_values('score', ascending=False, inplace=True)
+# df_test.to_csv('temp/suchith_result.csv')
 
 
 
