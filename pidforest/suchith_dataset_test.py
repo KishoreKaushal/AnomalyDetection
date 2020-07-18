@@ -8,8 +8,9 @@ from sklearn.preprocessing import OrdinalEncoder
 
 
 
-train_data_path = "/home/kaushal/Documents/git/AnomalyDetectionDL/data/dataset.pkl"
+# train_data_path = "/home/kaushal/Documents/git/AnomalyDetectionDL/data/dataset.pkl"
 
+train_data_path = "/home/kaushal/Downloads/dataset.pkl"
 
 df = pd.read_pickle(train_data_path)
 
@@ -22,8 +23,8 @@ for i in range(0,14):
 df = df[df['APIKEY'].isin(api_list)]
 df['LABEL'] = df['LABEL'].apply(lambda x: 0 if x=='NOT ANAMOLY' else 1 )
 
-cat = ['APIKEY', 'API', 'TIMEBIN']
-cont = list(set(df.columns) - set(cat) - set(['ANAMOLYDISTNUM']))
+cat = ['APIKEY', 'DAY', 'TIMEBIN']
+cont = list(set(df.columns) - set(cat) - set(['ANAMOLYDISTNUM', 'NUMFAILURES']))
 
 
 df_cat = df[cat]
@@ -68,7 +69,7 @@ X_test = df_test.values
 
 kwargs = {
 'max_depth': 10,
-'num_trees': 100,
+'num_trees': 128,
 'subsample_size': 128,
 'max_buckets': 5,
 'epsilon': 0.1,
@@ -84,7 +85,7 @@ print("Training pidforest time: {}",format(time.time() - t0))
 
 t0 = time.time()
 
-df_score = forest.score(df_test, percentile=0.80)
+df_score = forest.score(df_test, percentile=0.85)
 print("Testing time on df_test.shape {}  : {}".format(df_test.shape, time.time() - t0))
 
 df_test['score'] = df_score
