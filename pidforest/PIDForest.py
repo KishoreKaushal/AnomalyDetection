@@ -3,6 +3,9 @@ import pandas as pd
 import random
 import copy
 from Histogram import Histogram
+import pickle
+import os
+from datetime import datetime
 
 DELTA = 1e-3
 
@@ -276,3 +279,30 @@ class PointSet(object):
                 for i in range(1, len(val) - 1):
                     gap[i] = (val[i + 1] - val[i - 1]) / 2
             self.gap[col] = gap
+
+# TODO - move this inside PIDForest model
+def save_pidforest_model(pidforest, base_dir='./'):
+    now = datetime.now()
+    timestamp_str = now.strftime('%d_%m_%Y_%H_%M_%S')
+    timestamp_str = "PIDForest_" + timestamp_str
+
+    dir = os.path.join(base_dir, timestamp_str)
+
+    # create new directory
+    if os.path.exists(dir):
+        os.mkdir(dir)
+
+    # save the pidforest object
+    pidforest_pkl = os.path.join(base_dir, timestamp_str, "pidforest.pkl")
+    with open(pidforest_pkl, "wb") as pfile:
+        pickle.dump(pidforest, pfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # save individual trees to separate pickle files
+    pidtrees = pidforest.pid_trees
+
+    for tree in pidtrees:
+        tree_id = "_".join(map(str, tree.node_id))
+        pidtree_pkl = os.path.join(base_dir, timestamp_str, "pidtree_{}.pkl".format(tree_id))
+
+        with open(pidtree_pkl, "wb") as pfile:
+            pickle.dump(tree, pfile, protocol=pickle.HIGHEST_PROTOCOL)
