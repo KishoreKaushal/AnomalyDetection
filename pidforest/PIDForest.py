@@ -31,6 +31,9 @@ class PIDForest(object):
         self.end = dict()
         self.df = None
 
+    def save_to_disk(self, base_dir='./'):
+        save_pidforest_model(self, base_dir)
+
     def fit(self, df):
 
         self.df = df.copy()
@@ -76,6 +79,8 @@ class PIDForest(object):
 
         df = df.copy()
         tree_score_col = []
+
+        # TODO - this needs to be parallelized
         for i in range(self.num_trees):
             new_col_name = 'anomaly_score_tree_' + str(i)
             tree_score_col.append(new_col_name)
@@ -313,3 +318,15 @@ def save_pidforest_model(pidforest, base_dir='./'):
     pidforest_pkl = os.path.join(base_dir, timestamp_str, "pidforest.pkl")
     with open(pidforest_pkl, "wb") as pfile:
         pickle.dump(pidforest, pfile, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def load_pidtree(path):
+    with open(path, 'rb') as pfile:
+        tree = pickle.load(pfile)
+    return tree
+
+
+def load_pidforest_model(path):
+    with open(path, 'rb') as pfile:
+        forest = pickle.load(pfile)
+    return forest
