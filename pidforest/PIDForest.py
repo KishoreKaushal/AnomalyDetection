@@ -60,7 +60,10 @@ class PIDForest(object):
             self.start[col], self.end[col] = (df[col].min() - DELTA, df[col].max() + DELTA)
 
         self.pid_trees = []
-        for i in range(len(subsamples)):
+
+        print("Training the PIDForest model...")
+        # for i in range(len(subsamples)):
+        for i in tqdm(range(len(subsamples)), ncols=50):
             kwargs = {
                 'depth': 0,
                 'forest': self,
@@ -81,7 +84,10 @@ class PIDForest(object):
         tree_score_col = []
 
         # TODO - this needs to be parallelized
-        for i in range(self.num_trees):
+
+        print("Getting score from each PIDTree...")
+        # for i in range(self.num_trees):
+        for i in tqdm(range(self.num_trees), ncols=50):
             new_col_name = 'anomaly_score_tree_' + str(i)
             tree_score_col.append(new_col_name)
             df[new_col_name] = 0.0
